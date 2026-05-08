@@ -14,6 +14,7 @@ function App() {
     const gestureDetectorRef = useRef(createGestureDetector());
 
     const error: string | null = useCamera(videoRef)
+    const spotify = useSpotifyPlayer();
 
     useHandLandmarker(videoRef, canvasRef, (hands) => {
         const hand = hands[0];
@@ -21,20 +22,26 @@ function App() {
 
         if (gesture) {
             console.log("Gesture:", gesture);
+            switch (gesture) {
+                case "open_close_open":
+                    spotify.pauseOrPlay().then(() => "Paused/Played");
+                    break;
+                case "swipe_left":
+                    spotify.nextTrack().then(() => "Next");
+                    break;
+                case "swipe_right":
+                    spotify.previousTrack().then(() => "Previous");
+                    break;
+            }
         }
 
 
         const pinchVolume = detectPinchVolume(hand);
 
         if (pinchVolume?.active) {
-            console.log("Pinch volume:", pinchVolume.volume, {
-                normalizedDistance: pinchVolume.normalizedDistance,
-            });
+            spotify.setVolume(pinchVolume.volume);
         }
     });
-
-
-    const spotify = useSpotifyPlayer();
 
 
     return (
