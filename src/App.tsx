@@ -2,8 +2,16 @@ import './App.css'
 import {SpotifyLogin} from "./spotifyLogin.tsx";
 import {SpotifyPlayer} from "./spotifyPlayer.tsx";
 import {CameraPreview} from "./cameraPreview.tsx";
+import {useRef} from "react";
+import {useCamera} from "./hooks/useCamera.ts";
+import {useHandLandmarker} from "./hooks/useHandLandmarker.ts";
 
 function App() {
+    const videoRef = useRef<HTMLVideoElement>(null)
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const error: string | null = useCamera(videoRef)
+    useHandLandmarker(videoRef, canvasRef)
+
     return (
         <>
             <section id="center">
@@ -11,10 +19,10 @@ function App() {
                 {/*Outline is just so I see where the flexbox stuff is*/}
                 <div className="flex w-9/10 justify-between items-stretch gap-10 flex-1">
                     <div className="w-full flex items-center justify-center">
-                        <CameraPreview/>
+                        <CameraPreview videoRef={videoRef} error={error} canvasRef={canvasRef} />
                     </div>
                     <div className="w-full flex items-center justify-center">
-                        <SpotifyPlayer />
+                        <SpotifyPlayer/>
                     </div>
                 </div>
 
