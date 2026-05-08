@@ -308,11 +308,6 @@ export function detectPinchVolume(
 
     const thumbIndexDistance = normalized(thumbTip, indexTip);
 
-    /**
-     * Another anti-open/close check:
-     * If thumb/index are extremely far apart, this is probably not yet
-     * intentional pinch-control mode.
-     */
     const thumbIndexReasonable =
         thumbIndexDistance < 1.8;
 
@@ -334,10 +329,6 @@ export function detectPinchVolume(
         };
     }
 
-    /**
-     * Require the pinch-control pose to be held briefly before activating.
-     * This prevents open-close-open transitions from accidentally triggering volume.
-     */
     const activationDelayMs = 250;
 
     if (!pinchModeActive) {
