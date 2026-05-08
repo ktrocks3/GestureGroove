@@ -1,5 +1,5 @@
 import './App.css'
-import {Spotify} from "./spotify.tsx";
+import {SpotifyLogin} from "./spotifyLogin.tsx";
 
 function App() {
     return (
@@ -33,7 +33,7 @@ function App() {
 
                         <h2 className="m-0 leading-none">Login</h2>
                     </div>
-                    <Spotify/>
+                    <SpotifyLogin/>
                 </div>
                 <div id="social">
                     <div className="flex items-center justify-start gap-2">

@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 
-export function Spotify() {
+export function SpotifyLogin() {
     const tokenExpired = () => {
         const token = localStorage.getItem('spotify_token_expires_at');
         if (token == null) return true;
