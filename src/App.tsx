@@ -1,5 +1,6 @@
 import './App.css'
 import {SpotifyLogin} from "./spotifyLogin.tsx";
+import {SpotifyPlayer} from "./spotifyPlayer.tsx";
 
 function App() {
     return (
@@ -11,8 +12,8 @@ function App() {
                     <div className="outline-4 w-full">
                         This is where my camera is going to go
                     </div>
-                    <div className="outline-4 w-full">
-                        This is where the current spotify playback stuff is going to go
+                    <div className="w-full flex items-center justify-center">
+                        <SpotifyPlayer />
                     </div>
                 </div>
 
