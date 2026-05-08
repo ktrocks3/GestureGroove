@@ -6,19 +6,28 @@ import {useRef} from "react";
 import {useCamera} from "./hooks/useCamera.ts";
 import {useHandLandmarker} from "./hooks/useHandLandmarker.ts";
 import {useSpotifyPlayer} from "./hooks/useSpotifyPlayer.ts";
-import {classifyHandPose} from "./hooks/useGestureDetection.ts";
+import {classifyHandPose, createGestureDetector} from "./hooks/useGestureDetection.ts";
 
 function App() {
     const videoRef = useRef<HTMLVideoElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
+    const gestureDetectorRef = useRef(createGestureDetector());
+
     const error: string | null = useCamera(videoRef)
 
     useHandLandmarker(videoRef, canvasRef, (hands) => {
         const hand = hands[0];
 
-        if (!hand) return;
+        const pose = hand
+            ? classifyHandPose(hand)
+            : "unknown";
 
-        console.log(classifyHandPose(hand));
+        console.log("hand", pose);
+        const gesture = gestureDetectorRef.current.update(pose);
+
+        if (gesture) {
+            console.log("Gesture:", gesture);
+        }
     });
 
 
@@ -32,10 +41,10 @@ function App() {
                 {/*Outline is just so I see where the flexbox stuff is*/}
                 <div className="flex w-9/10 justify-between items-stretch gap-10 flex-1">
                     <div className="w-full flex items-center justify-center">
-                        <CameraPreview videoRef={videoRef} error={error} canvasRef={canvasRef} />
+                        <CameraPreview videoRef={videoRef} error={error} canvasRef={canvasRef}/>
                     </div>
                     <div className="w-full flex items-center justify-center">
-                        <SpotifyPlayer spotify={spotify} />
+                        <SpotifyPlayer spotify={spotify}/>
                     </div>
                 </div>
 

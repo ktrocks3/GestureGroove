@@ -43,3 +43,77 @@ export function classifyHandPose(hand: HandLandmark[]): HandPose {
 
     return "unknown";
 }
+
+export type HandGesture = "open_close_open";
+
+type GestureStep =
+    | "waiting_for_first_open"
+    | "waiting_for_fist"
+    | "waiting_for_second_open";
+
+export function createGestureDetector() {
+    let step: GestureStep = "waiting_for_first_open";
+
+    let firstOpenTime = 0;
+    let lastGestureTime = 0;
+
+    const maxGestureMs = 3000;
+    const cooldownMs = 1000;
+
+    function reset() {
+        step = "waiting_for_first_open";
+        firstOpenTime = 0;
+    }
+
+    function update(pose: HandPose): HandGesture | null {
+        const now = performance.now();
+
+        if (pose === "unknown") {
+            return null;
+        }
+
+        if (now - lastGestureTime < cooldownMs) {
+            return null;
+        }
+
+        if (
+            step !== "waiting_for_first_open" &&
+            now - firstOpenTime > maxGestureMs
+        ) {
+            reset();
+        }
+
+        console.log("gesture step:", step, "pose:", pose);
+
+        if (step === "waiting_for_first_open") {
+            if (pose === "open_palm") {
+                step = "waiting_for_fist";
+                firstOpenTime = now;
+            }
+
+            return null;
+        }
+
+        if (step === "waiting_for_fist") {
+            if (pose === "closed_fist") {
+                step = "waiting_for_second_open";
+            }
+
+            return null;
+        }
+
+        if (step === "waiting_for_second_open") {
+            if (pose === "open_palm") {
+                lastGestureTime = now;
+                reset();
+                return "open_close_open";
+            }
+
+            return null;
+        }
+
+        return null;
+    }
+
+    return { update };
+}
