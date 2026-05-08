@@ -6,7 +6,7 @@ import {useRef} from "react";
 import {useCamera} from "./hooks/useCamera.ts";
 import {useHandLandmarker} from "./hooks/useHandLandmarker.ts";
 import {useSpotifyPlayer} from "./hooks/useSpotifyPlayer.ts";
-import {classifyHandPose, createGestureDetector} from "./hooks/useGestureDetection.ts";
+import {createGestureDetector} from "./hooks/useGestureDetection.ts";
 
 function App() {
     const videoRef = useRef<HTMLVideoElement>(null)
@@ -17,13 +17,7 @@ function App() {
 
     useHandLandmarker(videoRef, canvasRef, (hands) => {
         const hand = hands[0];
-
-        const pose = hand
-            ? classifyHandPose(hand)
-            : "unknown";
-
-        console.log("hand", pose);
-        const gesture = gestureDetectorRef.current.update(pose);
+        const gesture = gestureDetectorRef.current.update(hand);
 
         if (gesture) {
             console.log("Gesture:", gesture);
