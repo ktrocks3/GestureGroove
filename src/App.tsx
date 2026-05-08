@@ -6,7 +6,7 @@ import {useRef} from "react";
 import {useCamera} from "./hooks/useCamera.ts";
 import {useHandLandmarker} from "./hooks/useHandLandmarker.ts";
 import {useSpotifyPlayer} from "./hooks/useSpotifyPlayer.ts";
-import {createGestureDetector} from "./hooks/useGestureDetection.ts";
+import {createGestureDetector, detectPinchVolume} from "./hooks/useGestureDetection.ts";
 
 function App() {
     const videoRef = useRef<HTMLVideoElement>(null)
@@ -21,6 +21,15 @@ function App() {
 
         if (gesture) {
             console.log("Gesture:", gesture);
+        }
+
+
+        const pinchVolume = detectPinchVolume(hand);
+
+        if (pinchVolume?.active) {
+            console.log("Pinch volume:", pinchVolume.volume, {
+                normalizedDistance: pinchVolume.normalizedDistance,
+            });
         }
     });
 

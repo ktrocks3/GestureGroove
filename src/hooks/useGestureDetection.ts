@@ -22,6 +22,27 @@ export function palmCenter(hand: HandLandmark[]) {
     return {x, y};
 }
 
+export type PinchVolumeResult = {
+    active: boolean;
+    volume: number;
+    rawDistance: number;
+    normalizedDistance: number;
+};
+
+function clamp(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max);
+}
+
+function mapRange(
+    value: number,
+    inputMin: number,
+    inputMax: number,
+    outputMin: number,
+    outputMax: number
+) {
+    const normalized = (value - inputMin) / (inputMax - inputMin);
+    return outputMin + normalized * (outputMax - outputMin);
+}
 const FINGERS = [
     {name: "index", tip: 8, pip: 6},
     {name: "middle", tip: 12, pip: 10},
@@ -139,7 +160,6 @@ export function createGestureDetector() {
     }
 
     function detectSwipe(hand: HandLandmark[], pose: HandPose, now: number): HandGesture | null {
-        // Optional, but recommended: only swipe with an open palm.
         if (pose !== "open_palm") {
             swipeSamples.length = 0;
             return null;
@@ -227,4 +247,144 @@ export function createGestureDetector() {
     }
 
     return { update };
+}
+let pinchModeCandidateStart = 0;
+let pinchModeActive = false;
+let smoothedVolume = 0;
+
+export function detectPinchVolume(
+    hand: HandLandmark[] | undefined,
+    now = performance.now()
+): PinchVolumeResult | null {
+    if (!hand || hand.length < 21) {
+        pinchModeActive = false;
+        pinchModeCandidateStart = 0;
+        return null;
+    }
+
+    const wrist = hand[0];
+
+    const thumbTip = hand[4];
+    const indexTip = hand[8];
+
+    const indexMcp = hand[5];
+    const middleMcp = hand[9];
+
+    const middleTip = hand[12];
+    const middlePip = hand[10];
+
+    const ringTip = hand[16];
+    const ringPip = hand[14];
+
+    const pinkyTip = hand[20];
+    const pinkyPip = hand[18];
+
+    const handSize = distance(wrist, middleMcp);
+
+    if (handSize === 0) {
+        return null;
+    }
+
+    const normalized = (a: HandLandmark, b: HandLandmark) =>
+        distance(a, b) / handSize;
+
+    const middleCurled =
+        distance(middleTip, wrist) < distance(middlePip, wrist);
+
+    const ringCurled =
+        distance(ringTip, wrist) < distance(ringPip, wrist);
+
+    const pinkyCurled =
+        distance(pinkyTip, wrist) < distance(pinkyPip, wrist);
+
+    const backThreeFingersCurled =
+        middleCurled && ringCurled && pinkyCurled;
+
+    const indexAwayFromWrist =
+        normalized(indexTip, wrist) > normalized(indexMcp, wrist) * 1.15;
+
+    const thumbAwayFromWrist =
+        normalized(thumbTip, wrist) > 0.75;
+
+    const thumbIndexDistance = normalized(thumbTip, indexTip);
+
+    /**
+     * Another anti-open/close check:
+     * If thumb/index are extremely far apart, this is probably not yet
+     * intentional pinch-control mode.
+     */
+    const thumbIndexReasonable =
+        thumbIndexDistance < 1.8;
+
+    const pinchModeCandidate =
+        backThreeFingersCurled &&
+        indexAwayFromWrist &&
+        thumbAwayFromWrist &&
+        thumbIndexReasonable;
+
+    if (!pinchModeCandidate) {
+        pinchModeActive = false;
+        pinchModeCandidateStart = 0;
+
+        return {
+            active: false,
+            volume: 0,
+            rawDistance: 0,
+            normalizedDistance: 0,
+        };
+    }
+
+    /**
+     * Require the pinch-control pose to be held briefly before activating.
+     * This prevents open-close-open transitions from accidentally triggering volume.
+     */
+    const activationDelayMs = 250;
+
+    if (!pinchModeActive) {
+        if (pinchModeCandidateStart === 0) {
+            pinchModeCandidateStart = now;
+            return {
+                active: false,
+                volume: 0,
+                rawDistance: 0,
+                normalizedDistance: thumbIndexDistance,
+            };
+        }
+
+        if (now - pinchModeCandidateStart < activationDelayMs) {
+            return {
+                active: false,
+                volume: 0,
+                rawDistance: 0,
+                normalizedDistance: thumbIndexDistance,
+            };
+        }
+
+        pinchModeActive = true;
+    }
+
+    const closedDistance = 0.25;
+    const openDistance = 1.25;
+
+    const unclampedVolume = mapRange(
+        thumbIndexDistance,
+        closedDistance,
+        openDistance,
+        0,
+        100
+    );
+
+    const rawVolume = clamp(unclampedVolume, 0, 100);
+
+    const smoothing = 0.25;
+    smoothedVolume =
+        smoothedVolume * (1 - smoothing) +
+        rawVolume * smoothing;
+
+    return {
+        active: true,
+        volume: Math.round(smoothedVolume),
+        rawDistance: distance(thumbTip, indexTip),
+        normalizedDistance: thumbIndexDistance,
+    };
 }
