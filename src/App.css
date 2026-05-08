@@ -186,6 +186,60 @@
   border-right-color: var(--border);
 }
 
+.spotify-login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 50%;
+
+  padding: 12px 22px;
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+
+  color: #020202;
+  background: var(--accent);
+
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+
+  cursor: pointer;
+  box-shadow:
+          0 0 0 4px rgba(22, 219, 101, 0.08),
+          var(--shadow);
+
+  transition:
+          transform 0.2s ease,
+          background-color 0.2s ease,
+          box-shadow 0.2s ease,
+          border-color 0.2s ease;
+}
+
+.spotify-login:hover {
+  background: #38e87d;
+  transform: translateY(-2px);
+  box-shadow:
+          0 0 0 6px rgba(22, 219, 101, 0.1),
+          var(--shadow);
+}
+
+.spotify-login:active {
+  transform: translateY(0);
+}
+
+.spotify-login:focus-visible {
+  outline: 2px solid var(--text-h);
+  outline-offset: 3px;
+}
+
+.spotify-login:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
 @media (max-width: 1024px) {
   #center {
     gap: 18px;
