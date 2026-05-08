@@ -1,6 +1,7 @@
 import './App.css'
 import {SpotifyLogin} from "./spotifyLogin.tsx";
 import {SpotifyPlayer} from "./spotifyPlayer.tsx";
+import {CameraPreview} from "./cameraPreview.tsx";
 
 function App() {
     return (
@@ -9,8 +10,8 @@ function App() {
                 <h1>Gesture Groove</h1>
                 {/*Outline is just so I see where the flexbox stuff is*/}
                 <div className="flex w-9/10 justify-between items-stretch gap-10 flex-1">
-                    <div className="outline-4 w-full">
-                        This is where my camera is going to go
+                    <div className="w-full flex items-center justify-center">
+                        <CameraPreview/>
                     </div>
                     <div className="w-full flex items-center justify-center">
                         <SpotifyPlayer />
