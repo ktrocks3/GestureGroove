@@ -5,12 +5,16 @@ import {CameraPreview} from "./cameraPreview.tsx";
 import {useRef} from "react";
 import {useCamera} from "./hooks/useCamera.ts";
 import {useHandLandmarker} from "./hooks/useHandLandmarker.ts";
+import {useSpotifyPlayer} from "./hooks/useSpotifyPlayer.ts";
 
 function App() {
     const videoRef = useRef<HTMLVideoElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const error: string | null = useCamera(videoRef)
     useHandLandmarker(videoRef, canvasRef)
+
+    const spotify = useSpotifyPlayer();
+
 
     return (
         <>
@@ -22,7 +26,7 @@ function App() {
                         <CameraPreview videoRef={videoRef} error={error} canvasRef={canvasRef} />
                     </div>
                     <div className="w-full flex items-center justify-center">
-                        <SpotifyPlayer/>
+                        <SpotifyPlayer spotify={spotify} />
                     </div>
                 </div>
 
