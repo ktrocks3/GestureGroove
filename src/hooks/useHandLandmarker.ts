@@ -1,14 +1,30 @@
-import { type RefObject, useEffect } from "react";
+import {type RefObject, useEffect, useRef} from "react";
 import {
     DrawingUtils,
     FilesetResolver,
     HandLandmarker,
 } from "@mediapipe/tasks-vision";
 
+
+export type HandLandmark = {
+    x: number;
+    y: number;
+    z?: number;
+};
+
+type OnHandsDetected = (hands: HandLandmark[][]) => void;
+
 export function useHandLandmarker(
     videoRef: RefObject<HTMLVideoElement | null>,
-    canvasRef: RefObject<HTMLCanvasElement | null>
+    canvasRef: RefObject<HTMLCanvasElement | null>,
+    onHandsDetected?: OnHandsDetected
 ) {
+    const onHandsDetectedRef = useRef(onHandsDetected);
+
+    useEffect(() => {
+        onHandsDetectedRef.current = onHandsDetected;
+    }, [onHandsDetected]);
+
     useEffect(() => {
         let handLandmarker: HandLandmarker | null = null;
         let animationFrameId: number | null = null;
@@ -56,8 +72,10 @@ export function useHandLandmarker(
                         video.videoWidth > 0 &&
                         video.videoHeight > 0
                     ) {
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
+                        if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                        }
 
                         context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -66,6 +84,7 @@ export function useHandLandmarker(
                             performance.now()
                         );
 
+                        onHandsDetectedRef.current?.(results.landmarks);
 
                         for (const hand of results.landmarks) {
                             drawingUtils.drawConnectors(

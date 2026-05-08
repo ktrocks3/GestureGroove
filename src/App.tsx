@@ -6,12 +6,21 @@ import {useRef} from "react";
 import {useCamera} from "./hooks/useCamera.ts";
 import {useHandLandmarker} from "./hooks/useHandLandmarker.ts";
 import {useSpotifyPlayer} from "./hooks/useSpotifyPlayer.ts";
+import {classifyHandPose} from "./hooks/useGestureDetection.ts";
 
 function App() {
     const videoRef = useRef<HTMLVideoElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const error: string | null = useCamera(videoRef)
-    useHandLandmarker(videoRef, canvasRef)
+
+    useHandLandmarker(videoRef, canvasRef, (hands) => {
+        const hand = hands[0];
+
+        if (!hand) return;
+
+        console.log(classifyHandPose(hand));
+    });
+
 
     const spotify = useSpotifyPlayer();
 
