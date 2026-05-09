@@ -90,6 +90,7 @@ function App() {
                     <SpotifyLogin
                         loggedIn={loggedIn}
                         setLoggedIn={setLoggedIn}
+                        spotify={spotify}
                     />
                 </div>
                 <div id="social">
