@@ -43,6 +43,7 @@ function mapRange(
     const normalized = (value - inputMin) / (inputMax - inputMin);
     return outputMin + normalized * (outputMax - outputMin);
 }
+
 const FINGERS = [
     {name: "index", tip: 8, pip: 6},
     {name: "middle", tip: 12, pip: 10},
@@ -246,11 +247,13 @@ export function createGestureDetector() {
         return null;
     }
 
-    return { update };
+    return {update};
 }
+
 let pinchModeCandidateStart = 0;
 let pinchModeActive = false;
 let smoothedVolume = 0;
+let backThreeFingersCurledStart = 0;
 
 export function detectPinchVolume(
     hand: HandLandmark[] | undefined,
@@ -259,6 +262,7 @@ export function detectPinchVolume(
     if (!hand || hand.length < 21) {
         pinchModeActive = false;
         pinchModeCandidateStart = 0;
+        backThreeFingersCurledStart = 0;
         return null;
     }
 
@@ -299,6 +303,27 @@ export function detectPinchVolume(
 
     const backThreeFingersCurled =
         middleCurled && ringCurled && pinkyCurled;
+    const backThreeFingersCurlDelayMs = 500;
+
+    if (backThreeFingersCurled) {
+        if (backThreeFingersCurledStart === 0) {
+            backThreeFingersCurledStart = now;
+        }
+    } else {
+        backThreeFingersCurledStart = 0;
+        pinchModeActive = false;
+        pinchModeCandidateStart = 0;
+
+        return {
+            active: false,
+            volume: 0,
+            rawDistance: 0,
+            normalizedDistance: 0,
+        };
+    }
+
+    const backThreeFingersCurledLongEnough =
+        now - backThreeFingersCurledStart >= backThreeFingersCurlDelayMs;
 
     const indexAwayFromWrist =
         normalized(indexTip, wrist) > normalized(indexMcp, wrist) * 1.15;
@@ -312,7 +337,7 @@ export function detectPinchVolume(
         thumbIndexDistance < 1.8;
 
     const pinchModeCandidate =
-        backThreeFingersCurled &&
+        backThreeFingersCurledLongEnough &&
         indexAwayFromWrist &&
         thumbAwayFromWrist &&
         thumbIndexReasonable;

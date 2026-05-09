@@ -1,73 +1,51 @@
-# React + TypeScript + Vite
+# GestureGroove
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Control Spotify with hand gestures using your webcam.
 
-Currently, two official plugins are available:
+GestureGroove is a web app that uses real-time hand tracking to control Spotify playback. It combines webcam input, MediaPipe hand landmarks, custom gesture detection, and the Spotify Web API into a polished browser-based music control demo.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Demo
 
-## React Compiler
+Demo video coming soon.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- Spotify login with Authorization Code + PKCE
+- Current track display with album art, artist, album, progress, and playback state
+- Manual playback controls for play/pause, next, previous, and volume
+- Webcam preview with hand landmark overlay
+- Real-time gesture detection
+- Gesture-controlled Spotify playback
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Gesture Controls
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Gesture | Action |
+|---|---|
+| Closed fist → open palm | Play / pause |
+| Swipe left | Next track |
+| Swipe right | Previous track |
+| Pinch distance | Volume control |
+| Fully pinched fingers | Lower volume |
+| Wide pinch distance | Higher volume |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Tech Stack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- React
+- Vite
+- TypeScript
+- Tailwind CSS
+- MediaPipe Tasks Vision
+- Spotify Web API
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## How It Works
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+GestureGroove runs entirely in the browser.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+```text
+Webcam feed
+  ↓
+MediaPipe hand landmark detection
+  ↓
+Custom gesture detection
+  ↓
+Spotify Web API playback commands

@@ -1,12 +1,13 @@
-import {useEffect, useRef, useState} from "react";
+import {type Dispatch, type SetStateAction, useEffect, useRef, useState} from "react";
+import type {useSpotifyPlayer} from "./hooks/useSpotifyPlayer.ts";
 
-export function SpotifyLogin() {
-    const tokenExpired = () => {
-        const token = localStorage.getItem('spotify_token_expires_at');
-        if (token == null) return true;
-        const expiresAt = Number(token);
-        return !expiresAt || Date.now() >= expiresAt - 60_000;
-    }
+type SpotifyLoginProps = {
+    loggedIn: boolean;
+    setLoggedIn: Dispatch<SetStateAction<boolean>>;
+    spotify: ReturnType<typeof useSpotifyPlayer>;
+};
+
+export function SpotifyLogin({ loggedIn, setLoggedIn, spotify }: SpotifyLoginProps) {
 
     const logoutSpotify = () => {
         localStorage.removeItem('access_token');
@@ -119,14 +120,12 @@ export function SpotifyLogin() {
         localStorage.removeItem('code_verifier');
         localStorage.removeItem('spotify_auth_state');
         setLoggedIn(true);
+        setTimeout(spotify.getPlaying, 3000);
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
 
     const hasRun = useRef(false);
-    const [loggedIn, setLoggedIn] = useState(() =>
-        localStorage.getItem('access_token') !== null && !tokenExpired()
-    );
     const [error, setError] = useState(false);
 
     useEffect(() => {
